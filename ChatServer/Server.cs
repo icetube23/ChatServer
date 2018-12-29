@@ -63,7 +63,7 @@ namespace ChatServer
         private Socket s;
         private string name;
 
-        public ClientHandle(Socket s, string name = null) => this.s = s;
+        public ClientHandle(Socket s) => this.s = s;
 
         public void Start()
         {
@@ -73,7 +73,10 @@ namespace ChatServer
 
         private void Communicate()
         {
-            Console.WriteLine("A client connected.");
+            GetName();
+            Console.WriteLine("Client " + name + " connected.");
+            Server.Broadcast(name + " joined the server.", name, false);
+
             // Receive messages from client
             byte[] bytes = new byte[256];
             while (true)
@@ -90,10 +93,27 @@ namespace ChatServer
                 }
                 catch (SocketException)
                 {
-                    Console.WriteLine("A client disconnected.");
+                    Console.WriteLine("Client " + name + " disconnected.");
                     Server.clientList.Remove(s);
                     break;
                 }
+            }
+        }
+
+        private void GetName()
+        {
+            // Receive client name
+            byte[] bytes = new byte[256];
+            try
+            {
+                s.Receive(bytes);
+                name = Encoding.UTF8.GetString(bytes);
+                if (name.Length > 16) { name = name.Substring(0, 16); }
+            }
+            catch
+            {
+                // If client name can't be received, close socket
+                s.Close();
             }
         }
     }
