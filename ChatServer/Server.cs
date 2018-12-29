@@ -4,11 +4,14 @@ using System.Text;
 using System.Threading;
 using System.Net.Sockets;
 using System.Collections.Generic;
+using System.IO;
 
 namespace ChatServer
 {
     class Server
     {
+        public static List<Socket> clientList = new List<Socket>();
+
         static void Main(string[] args)
         {
             try
@@ -29,6 +32,7 @@ namespace ChatServer
                 while (true)
                 {
                     Socket s = server.AcceptSocket();
+                    clientList.Add(s);
                     ClientHandle client = new ClientHandle(s);
                     client.Start();
                 }
@@ -37,6 +41,19 @@ namespace ChatServer
             {
                 Console.WriteLine("Server application ended with " + e.StackTrace);
                 Console.Read();
+            }
+        }
+
+        public static void Broadcast(string msg, string client, bool flag = true)
+        {
+            // Create byte array from message to be broadcasted
+            byte[] bytes = flag ? Encoding.UTF8.GetBytes(client + ": " + msg)
+                                : Encoding.UTF8.GetBytes(msg);
+
+            // Write the message to all available clients
+            foreach (Socket s in clientList)
+            {
+                s.Send(bytes, 0, bytes.Length, SocketFlags.Broadcast);
             }
         }
     }
@@ -63,16 +80,18 @@ namespace ChatServer
             {
                 try
                 {
+                    // Read incoming bytes
                     int n = s.Receive(bytes);
-                    for (int i = 0; i < n; i++)
-                    {
-                        Console.Write(Convert.ToChar(bytes[i]));
-                    }
-                    Console.WriteLine();
+                    string received = Encoding.UTF8.GetString(bytes);
+                    Console.WriteLine(name + ": " + received);
+
+                    // Broadcast received message to all clients
+                    Server.Broadcast(received, name);
                 }
                 catch (SocketException)
                 {
                     Console.WriteLine("A client disconnected.");
+                    Server.clientList.Remove(s);
                     break;
                 }
             }
