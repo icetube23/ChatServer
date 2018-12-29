@@ -13,9 +13,6 @@ namespace ChatServer
         {
             try
             {
-                // List of threads to serve multiple clients
-                List<Thread> threads = new List<Thread>();
-
                 // IP Address and port to start server on
                 IPAddress ipAddress = IPAddress.Parse("192.168.179.47");
                 int port = 8000;
@@ -47,8 +44,9 @@ namespace ChatServer
     class ClientHandle
     {
         private Socket s;
+        private string name;
 
-        public ClientHandle(Socket s) => this.s = s;
+        public ClientHandle(Socket s, string name = null) => this.s = s;
 
         public void Start()
         {
@@ -59,7 +57,6 @@ namespace ChatServer
         private void Communicate()
         {
             Console.WriteLine("A client connected.");
-
             // Receive messages from client
             byte[] bytes = new byte[256];
             while (true)
