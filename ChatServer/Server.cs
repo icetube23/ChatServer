@@ -4,7 +4,6 @@ using System.Text;
 using System.Threading;
 using System.Net.Sockets;
 using System.Collections.Generic;
-using System.IO;
 
 namespace ChatServer
 {
@@ -17,7 +16,8 @@ namespace ChatServer
             try
             {
                 // IP Address and port to start server on
-                IPAddress ipAddress = IPAddress.Parse("192.168.179.47");
+                // IPAddress ipAddress = IPAddress.Parse("192.168.179.47");
+                IPAddress ipAddress = IPAddress.Parse("192.168.179.33");
                 int port = 8000;
 
                 // Create listener for server app
@@ -93,8 +93,9 @@ namespace ChatServer
                 }
                 catch (SocketException)
                 {
-                    Console.WriteLine("Client " + name + " disconnected.");
                     Server.clientList.Remove(s);
+                    Console.WriteLine("Client " + name + " disconnected.");
+                    Server.Broadcast(name + " left the server.", name, false);
                     break;
                 }
             }
