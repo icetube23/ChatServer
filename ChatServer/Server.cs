@@ -53,7 +53,7 @@ namespace ChatServer
             // Write the message to all available clients
             foreach (Socket s in clientList)
             {
-                s.Send(bytes, 0, bytes.Length, SocketFlags.Broadcast);
+                s.Send(bytes, 0, bytes.Length, SocketFlags.None);
             }
         }
     }
@@ -85,7 +85,7 @@ namespace ChatServer
                 {
                     // Read incoming bytes
                     int n = s.Receive(bytes);
-                    string received = Encoding.UTF8.GetString(bytes);
+                    string received = Encoding.UTF8.GetString(bytes).Substring(0, n);
                     Console.WriteLine(name + ": " + received);
 
                     // Broadcast received message to all clients
@@ -106,8 +106,8 @@ namespace ChatServer
             byte[] bytes = new byte[256];
             try
             {
-                s.Receive(bytes);
-                name = Encoding.UTF8.GetString(bytes);
+                int n = s.Receive(bytes);
+                name = Encoding.UTF8.GetString(bytes).Substring(0, n);
                 if (name.Length > 16) { name = name.Substring(0, 16); }
             }
             catch
