@@ -1,7 +1,9 @@
 ﻿using System;
-using System.Text;
 using System.Net;
+using System.Text;
+using System.Threading;
 using System.Net.Sockets;
+using System.Collections.Generic;
 
 namespace ChatServer
 {
@@ -11,6 +13,10 @@ namespace ChatServer
         {
             try
             {
+                // List of threads to serve multiple clients
+                List<Thread> threads = new List<Thread>();
+
+                // IP Address and port to start server on
                 IPAddress ipAddress = IPAddress.Parse("192.168.179.47");
                 int port = 8000;
 
@@ -22,28 +28,12 @@ namespace ChatServer
                 Console.WriteLine("Server running on port: " + port);
                 Console.WriteLine("Local end point: " + server.LocalEndpoint);
 
-                // Wait for a client to connect
-                Socket s = server.AcceptSocket();
-
-                Console.WriteLine("A client connected.");
-
-                // Receive messages from client
-                byte[] bytes = new byte[256];
+                // Wait for clients to connect
                 while (true)
                 {
-                    try
-                    {
-                        int n = s.Receive(bytes);
-                        for (int i = 0; i < n; i++)
-                        {
-                            Console.Write(Convert.ToChar(bytes[i]));
-                        }
-                        Console.WriteLine();
-                    }
-                    catch (SocketException)
-                    {
-                        s = server.AcceptSocket();
-                    }
+                    Socket s = server.AcceptSocket();
+                    ClientHandle client = new ClientHandle(s);
+                    client.Start();
                 }
             }
             catch (Exception e)
@@ -51,7 +41,44 @@ namespace ChatServer
                 Console.WriteLine("Server application ended with " + e.StackTrace);
                 Console.Read();
             }
-            
+        }
+    }
+
+    class ClientHandle
+    {
+        private Socket s;
+
+        public ClientHandle(Socket s) => this.s = s;
+
+        public void Start()
+        {
+            Thread thread = new Thread(Communicate);
+            thread.Start();
+        }
+
+        private void Communicate()
+        {
+            Console.WriteLine("A client connected.");
+
+            // Receive messages from client
+            byte[] bytes = new byte[256];
+            while (true)
+            {
+                try
+                {
+                    int n = s.Receive(bytes);
+                    for (int i = 0; i < n; i++)
+                    {
+                        Console.Write(Convert.ToChar(bytes[i]));
+                    }
+                    Console.WriteLine();
+                }
+                catch (SocketException)
+                {
+                    Console.WriteLine("A client disconnected.");
+                    break;
+                }
+            }
         }
     }
 }
