@@ -88,10 +88,14 @@ namespace ChatServer
                     Console.WriteLine(name + ": " + received);
 
                     // Broadcast received message to all clients
-                    Server.Broadcast(received, name);
+                    if (received != string.Empty)
+                    {
+                        Server.Broadcast(received, name);
+                    }
                 }
                 catch (SocketException)
                 {
+                    s.Close();
                     Server.clientList.Remove(s);
                     Console.WriteLine("Client " + name + " disconnected.");
                     Server.Broadcast(name + " left the server.", name, false);
