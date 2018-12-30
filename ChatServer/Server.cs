@@ -16,8 +16,7 @@ namespace ChatServer
             try
             {
                 // IP Address and port to start server on
-                // IPAddress ipAddress = IPAddress.Parse("192.168.179.47");
-                IPAddress ipAddress = IPAddress.Parse("192.168.179.33");
+                IPAddress ipAddress = IPAddress.Parse("192.168.179.47");
                 int port = 8000;
 
                 // Create listener for server app
@@ -67,8 +66,8 @@ namespace ChatServer
 
         public void Start()
         {
-            Thread thread = new Thread(Communicate);
-            thread.Start();
+            // Start a new thread for communication with client
+            new Thread(Communicate).Start();
         }
 
         private void Communicate()
@@ -78,12 +77,12 @@ namespace ChatServer
             Server.Broadcast(name + " joined the server.", name, false);
 
             // Receive messages from client
-            byte[] bytes = new byte[256];
+            byte[] bytes = new byte[512];
             while (true)
             {
                 try
                 {
-                    // Read incoming bytes
+                    // Read and decode incoming bytes
                     int n = s.Receive(bytes);
                     string received = Encoding.UTF8.GetString(bytes).Substring(0, n);
                     Console.WriteLine(name + ": " + received);
@@ -104,7 +103,7 @@ namespace ChatServer
         private void GetName()
         {
             // Receive client name
-            byte[] bytes = new byte[256];
+            byte[] bytes = new byte[512];
             try
             {
                 int n = s.Receive(bytes);
