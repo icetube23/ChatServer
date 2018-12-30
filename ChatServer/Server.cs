@@ -88,17 +88,18 @@ namespace ChatServer
                     Console.WriteLine(name + ": " + received);
 
                     // Broadcast received message to all clients
-                    if (received != string.Empty)
+                    if (received == "closing connection")
+                    {
+                        Close();
+                        break;
+                    }
+                    else if (received != string.Empty)
                     {
                         Server.Broadcast(received, name);
                     }
                 }
                 catch (SocketException)
                 {
-                    s.Close();
-                    Server.clientList.Remove(s);
-                    Console.WriteLine("Client " + name + " disconnected.");
-                    Server.Broadcast(name + " left the server.", name, false);
                     break;
                 }
             }
@@ -119,6 +120,15 @@ namespace ChatServer
                 // If client name can't be received, close socket
                 s.Close();
             }
+        }
+
+        private void Close()
+        {
+            // Close sockets and remove client
+            s.Close();
+            Server.clientList.Remove(s);
+            Console.WriteLine("Client " + name + " disconnected.");
+            Server.Broadcast(name + " left the server.", name, false);
         }
     }
 }
