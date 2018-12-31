@@ -100,6 +100,7 @@ namespace ChatServer
                 }
                 catch (SocketException)
                 {
+                    Close();
                     break;
                 }
             }
