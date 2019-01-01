@@ -88,7 +88,8 @@ namespace ChatServer
                     Console.WriteLine(name + ": " + received);
 
                     // Broadcast received message to all clients
-                    if (received == "closing connection")
+                    if (received == "0x3c0x630x6c0x6f0x730x690x6e0x670x200x63" +
+                                    "0x6f0x6e0x6e0x650x630x740x690x6f0x6e0x3e")
                     {
                         Close();
                         break;
